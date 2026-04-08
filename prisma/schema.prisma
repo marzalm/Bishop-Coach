@@ -15,7 +15,8 @@ model User {
   chesscomUsername    String?
   lichessUsername     String?
   games               Game[]
-  profile             WeaknessProfile?
+  weaknessProfiles    WeaknessProfile[]
+  trainingSessions    TrainingSession[]
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
@@ -31,13 +32,14 @@ model Game {
   color               String   // "white" | "black"
   analyzed            Boolean  @default(false)
   elo                 Int?     // ELO at time of game
-  timeControl         String?  // "blitz" | "rapid" | "classical"
+  timeControl         String   // "bullet" | "blitz" | "rapid"
   opponent            String?  // opponent username
   errors              GameError[]
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
   @@index([userId])
+  @@index([timeControl])
 }
 
 model GameError {
@@ -65,21 +67,32 @@ model GameError {
 
 model WeaknessProfile {
   id                  String   @id @default(cuid())
-  userId              String   @unique
+  userId              String
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeControl         String   // "bullet" | "blitz" | "rapid"
   weaknesses          String   @db.Text // JSON array of weaknesses with scores
   topWeaknesses       String   @db.Text // JSON array of top 3
-  updatedAt           DateTime @updatedAt
+  gameCount           Int      @default(0)
+  analyzedAt          DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  @@unique([userId, timeControl])
+  @@index([userId])
 }
 
 model TrainingSession {
   id                  String   @id @default(cuid())
   userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   errorId             String
+  timeControl         String   // "bullet" | "blitz" | "rapid"
   completed           Boolean  @default(false)
   attemptsCount       Int     @default(0)
   hiddenHints         Int     @default(0)
   correctAnswer       Boolean @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([timeControl])
 }

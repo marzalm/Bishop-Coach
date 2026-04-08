@@ -36,16 +36,54 @@ export async function getOrCreateUser(
   });
 }
 
-export async function getUserGames(userId: string) {
+export async function getUserGames(userId: string, timeControl?: string) {
   return prisma.game.findMany({
-    where: { userId },
+    where: {
+      userId,
+      ...(timeControl && { timeControl }),
+    },
     include: { errors: true },
     orderBy: { playedAt: 'desc' },
   });
 }
 
-export async function getUserProfile(userId: string) {
+export async function getUserProfile(userId: string, timeControl: string) {
   return prisma.weaknessProfile.findUnique({
-    where: { userId },
+    where: {
+      userId_timeControl: {
+        userId,
+        timeControl,
+      },
+    },
+  });
+}
+
+export async function createOrUpdateWeaknessProfile(
+  userId: string,
+  timeControl: string,
+  weaknesses: any,
+  topWeaknesses: any,
+  gameCount: number
+) {
+  return prisma.weaknessProfile.upsert({
+    where: {
+      userId_timeControl: {
+        userId,
+        timeControl,
+      },
+    },
+    update: {
+      weaknesses: JSON.stringify(weaknesses),
+      topWeaknesses: JSON.stringify(topWeaknesses),
+      gameCount,
+      analyzedAt: new Date(),
+    },
+    create: {
+      userId,
+      timeControl,
+      weaknesses: JSON.stringify(weaknesses),
+      topWeaknesses: JSON.stringify(topWeaknesses),
+      gameCount,
+    },
   });
 }

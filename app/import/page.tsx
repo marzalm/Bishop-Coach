@@ -6,6 +6,7 @@ import Link from 'next/link';
 export default function ImportPage() {
   const [chesscomUsername, setChesscomUsername] = useState('');
   const [lichessUsername, setLichessUsername] = useState('');
+  const [timeControl, setTimeControl] = useState<'bullet' | 'blitz' | 'rapid'>('blitz');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,6 +22,7 @@ export default function ImportPage() {
         body: JSON.stringify({
           chesscomUsername,
           lichessUsername,
+          timeControl,
         }),
       });
 
@@ -29,7 +31,7 @@ export default function ImportPage() {
       }
 
       const data = await response.json();
-      window.location.href = `/dashboard?userId=${data.userId}`;
+      window.location.href = `/dashboard?userId=${data.userId}&timeControl=${timeControl}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -72,7 +74,7 @@ export default function ImportPage() {
               className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
             />
             <p className="text-slate-400 text-sm mt-1">
-              We'll import your recent games from Chess.com
+              We'll import your games from Chess.com
             </p>
           </div>
 
@@ -89,7 +91,38 @@ export default function ImportPage() {
               className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
             />
             <p className="text-slate-400 text-sm mt-1">
-              We'll import your recent games from Lichess
+              We'll import your games from Lichess
+            </p>
+          </div>
+
+          {/* Time Control Selection */}
+          <div className="mb-8">
+            <label className="block text-white font-semibold mb-4">
+              Which time control do you want to focus on?
+            </label>
+            <div className="grid grid-cols-3 gap-4">
+              {['bullet', 'blitz', 'rapid'].map((tc) => (
+                <button
+                  key={tc}
+                  type="button"
+                  onClick={() => setTimeControl(tc as 'bullet' | 'blitz' | 'rapid')}
+                  className={`p-4 rounded-lg font-semibold transition ${
+                    timeControl === tc
+                      ? 'bg-blue-600 text-white border-2 border-blue-500'
+                      : 'bg-slate-700 text-slate-300 border-2 border-slate-600 hover:border-blue-500'
+                  }`}
+                >
+                  <div className="capitalize text-lg">{tc}</div>
+                  <div className="text-xs mt-1 opacity-75">
+                    {tc === 'bullet' && '1-2 min'}
+                    {tc === 'blitz' && '3-5 min'}
+                    {tc === 'rapid' && '10+ min'}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-slate-400 text-sm mt-3">
+              Your analysis will focus only on {timeControl} games to give tailored insights
             </p>
           </div>
 
@@ -105,9 +138,9 @@ export default function ImportPage() {
         {/* Info */}
         <div className="mt-12 space-y-6">
           <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg">
-            <h3 className="text-white font-semibold mb-2">📊 What happens next?</h3>
+            <h3 className="text-white font-semibold mb-2">📊 Why time-specific analysis?</h3>
             <p className="text-slate-400 text-sm">
-              We'll fetch your recent games and analyze them using Stockfish. This may take a few minutes depending on the number of games.
+              Your weaknesses differ by time control. In bullet, you might make tactical blunders. In rapid, positional understanding matters more. We'll give you targeted coaching.
             </p>
           </div>
 
