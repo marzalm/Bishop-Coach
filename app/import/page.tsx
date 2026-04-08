@@ -38,46 +38,69 @@ export default function ImportPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black border-t-4 border-cyan-500 relative overflow-hidden">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_24%,rgba(0,255,255,.1)_25%,rgba(0,255,255,.1)_26%,transparent_27%,transparent_74%,rgba(0,255,255,.1)_75%,rgba(0,255,255,.1)_76%,transparent_77%,transparent)] bg-[length:50px_50px]"></div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+    <main className="min-h-screen bg-black text-white">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-12 border-l-4 border-magenta-500 pl-4">
-          <Link href="/" className="text-cyan-400 hover:text-magenta-400 text-sm mb-4 inline-block font-mono transition-colors hover:shadow-[0_0_10px_rgba(0,255,255,0.5)]">
-            ↳ BACK TO MAIN.SYS
+        <div className="mb-12">
+          <Link href="/" className="text-gray-400 hover:text-white text-sm mb-4 inline-block">
+            ← Back to home
           </Link>
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-magenta-500 to-cyan-400 mb-2 font-mono tracking-widest">
-            [ IMPORT GAMES ]
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Import Games
           </h1>
-          <p className="text-lime-400 font-mono text-sm animate-pulse">
-            »» CONNECT YOUR CHESS ACCOUNTS ••••••
+          <p className="text-gray-400">
+            Connect your chess accounts to begin analysis
           </p>
         </div>
 
         {/* Import Form */}
-        <form onSubmit={handleSubmit} className="bg-gray-950 border-2 border-cyan-500 p-8 relative overflow-hidden shadow-[0_0_20px_rgba(0,255,255,0.3)]">
-          {/* Scanlines effect */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500 to-transparent"></div>
+        <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 p-8 rounded">
+          {error && (
+            <div className="mb-6 p-4 bg-red-900 border border-red-700 text-red-200 rounded">
+              Error: {error}
+            </div>
+          )}
+
+          <div className="mb-6">
+            <label htmlFor="chesscom" className="block text-white font-semibold mb-2">
+              Chess.com Username
+            </label>
+            <input
+              id="chesscom"
+              type="text"
+              value={chesscomUsername}
+              onChange={(e) => setChesscomUsername(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-white"
+              placeholder="Enter your Chess.com username"
+            />
           </div>
 
-          <div className="relative z-10">
-            {error && (
-              <div className="mb-6 p-4 bg-red-950 border-l-4 border-red-500 text-red-200 font-mono text-sm animate-pulse">
-                [ ERROR ] ⚠ {error}
-              </div>
-            )}
+          <div className="mb-6">
+            <label htmlFor="lichess" className="block text-white font-semibold mb-2">
+              Lichess Username
+            </label>
+            <input
+              id="lichess"
+              type="text"
+              value={lichessUsername}
+              onChange={(e) => setLichessUsername(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-white"
+              placeholder="Enter your Lichess username"
+            />
+          </div>
 
-            <div className="mb-6">
-              <label htmlFor="chesscom" className="block text-cyan-400 font-bold mb-2 font-mono text-sm">
-                &gt; CHESS.COM USERNAME
-              </label>
-              <input
-                id="chesscom"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Importing...' : 'Import Games'}
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
                 type="text"
                 placeholder="username_here"
                 value={chesscomUsername}
