@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String   @id @default(cuid())
+  chesscomUsername    String?
+  lichessUsername     String?
+  games               Game[]
+  profile             WeaknessProfile?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Game {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source              String   // "chesscom" | "lichess"
+  pgn                 String   @db.Text
+  playedAt            DateTime
+  result              String   // "win" | "loss" | "draw"
+  color               String   // "white" | "black"
+  analyzed            Boolean  @default(false)
+  elo                 Int?     // ELO at time of game
+  timeControl         String?  // "blitz" | "rapid" | "classical"
+  opponent            String?  // opponent username
+  errors              GameError[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model GameError {
+  id                  String  @id @default(cuid())
+  gameId              String
+  game                Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  fen                 String  // position exacte de l'erreur
+  movePlayed          String  // coup joué (mauvais)
+  bestMove            String  // meilleur coup selon Stockfish
+  evalBefore          Float   // évaluation avant le coup
+  evalAfter           Float   // évaluation après le coup
+  lossInCentipawns    Int     // perte en centipawns
+  errorType           String  // "blunder" | "mistake" | "inaccuracy"
+  category            String? // "tactic" | "endgame" | "opening" | "positional" | "kingsafety"
+  explanation         String? @db.Text // explication Claude
+  trained             Boolean @default(false)
+  trainingScore       Int     @default(0) // score de maîtrise (0-100)
+  lastTrainedAt       DateTime?
+  trainingCount       Int     @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([gameId])
+}
+
+model WeaknessProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weaknesses          String   @db.Text // JSON array of weaknesses with scores
+  topWeaknesses       String   @db.Text // JSON array of top 3
+  updatedAt           DateTime @updatedAt
+}
+
+model TrainingSession {
+  id                  String   @id @default(cuid())
+  userId              String
+  errorId             String
+  completed           Boolean  @default(false)
+  attemptsCount       Int     @default(0)
+  hiddenHints         Int     @default(0)
+  correctAnswer       Boolean @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
